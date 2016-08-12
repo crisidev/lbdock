@@ -1,0 +1,27 @@
+[Unit]
+Description=Prometheus
+After=docker.service dnsdock.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+Environment="DOCKER_IMAGE=prom/prometheus:v1.0.1"
+Environment="DOCKER_NAME=prometheus"
+Environment="DOCKER_PORT=9090"
+Environment="DNSDOCK_ENV=prod"
+Environment="DNSDOCK_PROXY={\"https\":9090,\"htaccess\":\"true\",\"prom\":9090}"
+ExecStartPre=-/usr/bin/docker kill ${DOCKER_NAME}
+ExecStartPre=-/usr/bin/docker rm ${DOCKER_NAME}
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStart=/usr/bin/docker run --rm --name ${DOCKER_NAME} --expose ${DOCKER_PORT} -m 2048M \
+  -e DNSDOCK_PROXY=${DNSDOCK_PROXY} -e DNSDOCK_IMAGE=${DOCKER_NAME} -e DNSDOCK_ENV=${DNSDOCK_ENV} \
+  -v {{ config.field('data_dir') }}/${DOCKER_NAME}:/data -v {{ config.field('config_dir') }}/conf/${DOCKER_NAME}:/conf \
+  ${DOCKER_IMAGE} -config.file /conf/prometheus.yml -storage.local.path /data \
+  -web.console.libraries /conf/console_libraries -web.console.templates /conf/consoles \
+  -web.external-url {% if config.field('letsencrypt') == True %}https{% else %}http{% endif %}://prometheus.{{ config.field('domain') }} \
+  -alertmanager.url http://alert.{{ config.field('domain') }}:9093 \
+  -storage.local.retention 1460h0m0s -web.enable-remote-shutdown
+ExecStop=/usr/bin/docker stop ${DOCKER_NAME}
+
+[Install]
+WantedBy=multi-user.target

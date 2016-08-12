@@ -1,0 +1,11 @@
+[Unit]
+Description=Prometheus targets update
+After=cluster.service docker.service
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/bin/bash -c "lbdock prom"
+
+[Install]
+WantedBy=multi-user.target

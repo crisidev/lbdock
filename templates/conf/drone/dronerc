@@ -1,0 +1,12 @@
+PUBLIC_MODE=true
+SERVER_ADDR=:80
+GIN_MODE=release
+REMOTE_DRIVER=gogs
+{% if config['letsencrypt'] == True %}
+REMOTE_CONFIG=https://git.{{ config['domain'] }}?open=false
+{% else %}
+REMOTE_CONFIG=http://git.{{ config['domain'] }}?open=false
+{% endif %}
+DATABASE_DRIVER=sqlite3
+DATABASE_CONFIG=/data/drone.sqlite
+DEBUG=true

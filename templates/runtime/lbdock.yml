@@ -1,0 +1,7 @@
+{% for name, proxy in args.iteritems() %}{% if proxy.get('prom') %}
+- targets:
+  - "{{ name }}:{{ proxy.get('prom') }}"
+  labels:
+    cluster: "{{ config.field('domain') }}"
+    job: "{{ proxy.get('name') }}"
+{% endif %}{% endfor %}

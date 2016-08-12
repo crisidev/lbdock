@@ -1,0 +1,11 @@
+[Unit]
+Description=Nginx targets update
+After=cluster.service docker.service
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/bin/bash -c "lbdock proxy"
+
+[Install]
+WantedBy=multi-user.target

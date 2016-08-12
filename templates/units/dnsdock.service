@@ -1,0 +1,20 @@
+[Unit]
+Description=DNSDock
+After=docker.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+Environment="DOCKER_IMAGE=crisidev/dnsdock:1.13.1"
+Environment="DOCKER_NAME=dnsdock"
+ExecStartPre=-/usr/bin/docker kill ${DOCKER_NAME}
+ExecStartPre=-/usr/bin/docker rm ${DOCKER_NAME}
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStart=/usr/bin/docker run --rm --name ${DOCKER_NAME} \
+  -e DNSDOCK_PROXY=${DNSDOCK_PROXY} -e DNSDOCK_IMAGE=${DOCKER_NAME} -e DNSDOCK_ENV=${DNSDOCK_ENV} \
+  -v /var/run/docker.sock:/var/run/docker.sock -p {{ config.field('docker_bridge_ip') }}:53:53/udp \
+  ${DOCKER_IMAGE} -domain={{ config.field('domain') }} -nameserver 8.8.8.8:53,8.8.4.4:53 -verbose=false
+ExecStop=/usr/bin/docker stop ${DOCKER_NAME}
+
+[Install]
+WantedBy=multi-user.target

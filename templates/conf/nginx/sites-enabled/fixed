@@ -1,0 +1,121 @@
+server {
+  listen 80 default_server;
+
+  error_page 400 /errors/400.html;
+  error_page 401 /errors/401.html;
+  error_page 402 /errors/402.html;
+  error_page 403 /errors/403.html;
+  error_page 404 /errors/404.html;
+  error_page 500 /errors/500.html;
+  error_page 501 /errors/501.html;
+  error_page 502 /errors/502.html;
+  error_page 503 /errors/503.html;
+
+  location /errors {
+      root /etc/lbdock/conf/nginx;
+      internal;
+  }
+
+
+{% if config['letsencrypt'] %}
+  location '/' {
+    return 301 https://$host$request_uri;
+  }
+{% endif %}
+}
+
+
+server {
+  listen 80;
+  server_name {{ config['domain'] }} www.{{ config['domain'] }};
+
+  error_page 400 /errors/400.html;
+  error_page 401 /errors/401.html;
+  error_page 402 /errors/402.html;
+  error_page 403 /errors/403.html;
+  error_page 404 /errors/404.html;
+  error_page 500 /errors/500.html;
+  error_page 501 /errors/501.html;
+  error_page 502 /errors/502.html;
+  error_page 503 /errors/503.html;
+
+  location /errors {
+      root /etc/lbdock/conf/nginx;
+      internal;
+  }
+
+  location / {
+    root /var/lib/lbdock/nginx;
+  }
+}
+
+server {
+  listen 80;
+  server_name nginx-status.{{ config['domain'] }};
+  server_name localhost;
+
+  error_page 400 /errors/400.html;
+  error_page 401 /errors/401.html;
+  error_page 402 /errors/402.html;
+  error_page 403 /errors/403.html;
+  error_page 404 /errors/404.html;
+  error_page 500 /errors/500.html;
+  error_page 501 /errors/501.html;
+  error_page 502 /errors/502.html;
+  error_page 503 /errors/503.html;
+
+  location /errors {
+      root /etc/lbdock/conf/nginx;
+      internal;
+  }
+
+  location /metrics {
+    content_by_lua 'prometheus:collect()';
+    access_log   off;
+    allow 127.0.0.1;
+    allow 172.17.0.0/16;
+    deny all;
+  }
+
+  location /nginx_status {
+    stub_status on;
+    access_log   off;
+    allow 127.0.0.1;
+    allow 172.17.0.0/16;
+    deny all;
+  }
+}
+
+{% if config['letsencrypt'] %}
+server {
+  listen 443 ssl default;
+  server_name {{ config['domain'] }} www.{{ config['domain'] }};
+
+  ssl on;
+  ssl_certificate /etc/letsencrypt/live/{{ config['domain'] }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ config['domain'] }}/privkey.pem;
+  ssl_session_cache shared:SSL:10m;
+  ssl_protocols SSLv3 TLSv1;
+  ssl_ciphers  ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+  ssl_prefer_server_ciphers on;
+
+  error_page 400 /errors/400.html;
+  error_page 401 /errors/401.html;
+  error_page 402 /errors/402.html;
+  error_page 403 /errors/403.html;
+  error_page 404 /errors/404.html;
+  error_page 500 /errors/500.html;
+  error_page 501 /errors/501.html;
+  error_page 502 /errors/502.html;
+  error_page 503 /errors/503.html;
+
+  location /errors {
+      root /etc/lbdock/conf/nginx;
+      internal;
+  }
+
+  location / {
+    root /var/lib/lbdock/nginx;
+  }
+}
+{% endif %}

@@ -1,0 +1,25 @@
+$script = <<SCRIPT
+cd /home/lbdock
+git clone https://github.com/crisidev/lbdock
+cd lbdock
+cp -f vagrant/lbdock.json lbdock.json
+sudo python setup.py install
+sudo cp -f vagrant/lbdock.json /etc/lbdock/lbdock.json
+sudo ./link_nginx.sh
+sudo lbdock start dnsdock.service
+sudo lbdock start hub.service
+sudo lbdock start cadvisor.service
+SCRIPT
+
+Vagrant.configure("2") do |config|
+	config.ssh.username = "lbdock"
+  config.vm.box = "lbdock"
+  config.vm.hostname = "lbdock"
+  config.vm.network "private_network", type: "dhcp"
+  config.vm.synced_folder ENV['HOME'] + "/.lbdock/conf", "/etc/lbdock"
+  config.vm.synced_folder ENV['HOME'] + "/.lbdock/data", "/var/lib/lbdock"
+  config.vm.provider "virtualbox" do |v|
+      v.name = "lbdock"
+  end
+  config.vm.provision "shell", inline: $script
+end

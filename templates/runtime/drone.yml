@@ -1,0 +1,55 @@
+build:
+  image: <changeme>
+  commands:
+    - <changeme>
+
+notify:
+  irc:
+    prefix: build
+    nick: drone-{{ service.get('domain') }}
+    channel: '##crisidev'
+    server:
+      host: chat.freenode.net
+      port: 6667
+    when:
+      success: true
+      failure: true
+      change: true
+
+publish:
+    docker:
+    repo: {{ service.get('docker_image') }}
+    tag:
+      - latest
+      - master-$$BUILD_NUMBER
+    when:
+      branch: "master"
+  docker:
+    repo: {{ service.get('docker_image') }}
+    tag:
+      - devel
+      - devel-$$BUILD_NUMBER
+    when:
+      branch: "devel"
+  rsync:
+    user: drone
+    host: 172.17.0.1
+    port: 22
+    source: {{ service.get('name') }}.service
+    target: /crisidev-share/drone/units
+    delete: false
+    commands:
+      - sudo lbdock refresh {{ service.get('name') }}.service
+    when:
+      branch: "master"
+  rsync:
+    user: drone
+    host: 172.17.0.1
+    port: 22
+    source: {{ service.get('name') }}-devel.service
+    target: /crisidev-share/drone/units
+    delete: false
+    commands:
+      - sudo lbdock refresh {{ service.get('name') }}-devel.service
+    when:
+      branch: "devel"

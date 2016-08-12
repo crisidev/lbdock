@@ -1,0 +1,94 @@
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+{% for name, proxy in args.iteritems() %}{% if proxy.get('https') %}
+server {
+    listen 443 ssl;
+    server_name {{ name }};
+
+    ssl on;
+    ssl_certificate {{ proxy.get('cert') }};
+    ssl_certificate_key {{ proxy.get('key') }};
+    ssl_session_cache shared:SSL:10m;
+    ssl_protocols SSLv3 TLSv1;
+    ssl_ciphers  ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+    ssl_prefer_server_ciphers on;
+
+    proxy_set_header Host             $http_host;   # required for docker client's sake
+    proxy_set_header X-Real-IP        $remote_addr; # pass on real client's IP
+    client_max_body_size 0; # disable any limits to avoid HTTP 413 for large image uploads
+    chunked_transfer_encoding on;
+
+    error_page 401 /errors/401.html;
+    error_page 402 /errors/402.html;
+    error_page 403 /errors/403.html;
+    error_page 404 /errors/404.html;
+    error_page 500 /errors/500.html;
+    error_page 501 /errors/501.html;
+    error_page 502 /errors/502.html;
+    error_page 503 /errors/503.html;
+
+    location /errors {
+        root /etc/lbdock/conf/nginx;
+        internal;
+    }
+    # {{ config.field('letsencrypt') }}
+
+    location / {
+    {% if proxy.get('htaccess') != None and config.field('nginx_lua_auth') %}
+        access_by_lua_file /etc/nginx/lua/access_by_lua.lua;
+    {% endif %}
+    {% if name == 'plex.{}'.format(proxy.get('domain'))  %}
+        if ($http_x_plex_device_name = '') {
+            rewrite ^/$ https://$http_host/web/index.html;
+        }
+        proxy_redirect off;
+    {% endif %}
+        resolver {{ config.field('docker_bridge_ip') }};
+    {% if proxy.get('ssl') == True %}
+        set $backend_upstream "https://{{ name }}:{{ proxy.get('https') }}";
+    {% else %}
+        set $backend_upstream "http://{{ name }}:{{ proxy.get('https') }}";
+    {% endif %}
+        proxy_pass $backend_upstream;
+        proxy_http_version 1.1;
+        proxy_connect_timeout       600;
+        proxy_send_timeout          600;
+        proxy_read_timeout          600;
+        send_timeout                600;
+        proxy_intercept_errors on;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $http_connection;
+        proxy_set_header Host $http_host;
+    }
+{% if "hub" == "hub.{}".format(proxy.get('domain')) %}
+    add_header "Docker-Distribution-API-Version registry/2.0" always;
+    location /v2/ {
+        # Do not allow connections from docker 1.5 and earlier
+        # docker pre-1.6.0 did not properly set the user agent on ping, catch "Go *" user agents
+        if ($http_user_agent ~ "^(docker\/1\.(3|4|5(?!\.[0-9]-dev))|Go ).*$" ) {
+          return 404;
+        }
+
+      {% if proxy.get('htaccess') != None and config.field('nginx_lua_auth') %}
+        access_by_lua_file /etc/nginx/lua/access_by_lua.lua;
+      {% endif %}
+
+        resolver {{ config.field('docker_bridge_ip') }};
+        set $backend_upstream "https://{{ name }}:{{ proxy.get('https') }}";
+        proxy_pass $backend_upstream;
+        proxy_http_version 1.1;
+        proxy_connect_timeout       600;
+        proxy_send_timeout          600;
+        proxy_read_timeout          600;
+        send_timeout                600;
+        proxy_intercept_errors on;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Connection $http_connection;
+        proxy_set_header Host $http_host;
+    }
+{% endif %}
+}
+{% endif %}{% endfor %}

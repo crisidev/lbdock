@@ -1,0 +1,55 @@
+version: 0.1
+log:
+    fields:
+        service: registry
+http:
+    addr: :443
+{% if config['letsencrypt'] == True %}
+    tls:
+      certificate: /rootetc/letsencrypt/live/hub.{{ config['domain'] }}/fullchain.pem
+      key: /rootetc/letsencrypt/live/hub.{{ config['domain'] }}/privkey.pem
+{% endif %}
+storage:
+    cache:
+{% if config['registry_redis'] == True %}
+        blobdescriptor: redis
+{% else %}
+        blobdescriptor: inmemory
+{% endif %}
+{% if config['registry_s3'] == True %}
+    s3:
+        accesskey: {{ config['registry_s3_access_key'] }}
+        secretkey: {{ config['registry_s3_secret_key'] }}
+        region: {{ config['registry_s3_region'] }}
+        bucket: {{ config['registry_s3_bucket'] }}
+        encrypt: true
+        secure: true
+        v4auth: true
+        chunksize: 5242880
+        rootdirectory: /
+{% else %}
+    filesystem:
+        rootdirectory: /data
+{% endif %}
+    delete:
+        enabled: true
+    redirect:
+        disable: false
+    maintenance:
+        uploadpurging:
+            enabled: true
+            age: 168h
+            interval: 24h
+            dryrun: false
+{% if config['registry_redis'] == True %}
+redis:
+  addr: {{ config['redis_host']}}:{{ config['redis_port'] }}
+  db: 1
+  dialtimeout: 100ms
+  readtimeout: 100ms
+  writetimeout: 100ms
+  pool:
+    maxidle: 16
+    maxactive: 64
+    idletimeout: 300s
+{% endif %}

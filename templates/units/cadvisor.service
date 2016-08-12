@@ -1,0 +1,23 @@
+[Unit]
+Description=Cadvisor
+After=docker.service dnsdock.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+Environment="DOCKER_IMAGE=google/cadvisor"
+Environment="DOCKER_NAME=cadvisor"
+Environment="DOCKER_PORT=8080"
+Environment="DNSDOCK_ENV=prod"
+Environment="DNSDOCK_PROXY={\"https\":8080,\"htaccess\":\"true\",\"prom\":8080}"
+ExecStartPre=-/usr/bin/docker kill ${DOCKER_NAME}
+ExecStartPre=-/usr/bin/docker rm ${DOCKER_NAME}
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStart=/usr/bin/docker run --rm --name ${DOCKER_NAME} --expose ${DOCKER_PORT} \
+  -e DNSDOCK_PROXY=${DNSDOCK_PROXY} -e DNSDOCK_IMAGE=${DOCKER_NAME} -e DNSDOCK_ENV=${DNSDOCK_ENV} \
+  -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys:ro -v /var/lib/docker/:/var/lib/docker:ro \
+  ${DOCKER_IMAGE}
+ExecStop=/usr/bin/docker stop ${DOCKER_NAME}
+
+[Install]
+WantedBy=user-config.target

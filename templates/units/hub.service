@@ -1,0 +1,23 @@
+[Unit]
+Description=Docker Hub V2
+After=docker.service dnsdock.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+Environment="DOCKER_IMAGE=registry:2"
+Environment="DOCKER_NAME=hub"
+Environment="DOCKER_PORT=443"
+Environment="DNSDOCK_ENV=prod"
+Environment="DNSDOCK_PROXY={\"https\":443,\"htacces\":\"true\"}"
+ExecStartPre=-/usr/bin/docker kill ${DOCKER_NAME}
+ExecStartPre=-/usr/bin/docker rm ${DOCKER_NAME}
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStart=/usr/bin/docker run --rm --name $DOCKER_NAME --expose ${DOCKER_PORT} \
+  -e DNSDOCK_PROXY=${DNSDOCK_PROXY} -e DNSDOCK_IMAGE=${DOCKER_NAME} -e DNSDOCK_ENV=${DNSDOCK_ENV} \
+  -v /etc:/rootetc -v {{ config.field('data_dir') }}/${DOCKER_NAME}:/data \
+  -v {{ config.field('config_dir') }}/conf/${DOCKER_NAME}:/etc/docker/registry ${DOCKER_IMAGE}
+ExecStop=/usr/bin/docker stop $DOCKER_NAME
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,28 @@
+stream {
+{% for name, proxy in args.iteritems() %}{% if proxy.get('tcp') %}
+    upstream {{ name }}-{{ proxy.get('tcp')[1] }} {
+        least_conn;
+        server {{ proxy.get('ip') }}:{{ proxy.get('tcp')[1] }};
+    }
+
+    server {
+        listen                  {{ proxy.get('tcp')[0] }};
+        proxy_pass              {{ name }}-{{ proxy.get('tcp')[1] }};
+        proxy_timeout           3s;
+        proxy_connect_timeout   1s;
+    }
+{% endif %}{% endfor %}
+{% for name, proxy in args.iteritems() %}{% if proxy.get('udp') %}
+    upstream {{ name }}-{{ proxy.get('udp')[1] }} {
+        least_conn;
+        server {{ proxy.get('ip') }}:{{ proxy.get('udp')[1] }};
+    }
+
+    server {
+        listen                  {{ proxy.get('tcp')[0] }} udp;
+        proxy_pass              {{ name }}-{{ proxy.get('udp')[1] }};
+        proxy_responses         1
+        proxy_timeout           1s;
+    }
+{% endif %}{% endfor %}
+}
