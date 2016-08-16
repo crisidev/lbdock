@@ -97,3 +97,4 @@ lbdock.json
 packer/packer_cache/*
 packer/output-virtualbox-iso/*
 packer/lbdock-*_virtualbox.box
+vagrant/.vagrant
