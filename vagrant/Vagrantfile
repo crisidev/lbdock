@@ -6,6 +6,7 @@ cp -f vagrant/lbdock.json lbdock.json
 sudo python setup.py install
 sudo cp -f vagrant/lbdock.json /etc/lbdock/lbdock.json
 sudo ./link_nginx.sh
+sudo systemctl start dnsmasq
 sudo lbdock start dnsdock.service
 sudo lbdock start hub.service
 sudo lbdock start cadvisor.service
@@ -14,7 +15,7 @@ SCRIPT
 Vagrant.configure("2") do |config|
 	config.ssh.username = "lbdock"
   config.vm.box = "lbdock"
-  config.vm.hostname = "lbdock"
+  config.vm.hostname = "lbdock-debian-jessie"
   config.vm.network "private_network", ip: "172.28.128.7"
   config.vm.synced_folder ENV['HOME'] + "/.lbdock/conf", "/etc/lbdock"
   config.vm.synced_folder ENV['HOME'] + "/.lbdock/data", "/var/lib/lbdock"

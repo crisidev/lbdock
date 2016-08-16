@@ -12,6 +12,7 @@ domain=lbdock.local
 local=/lbdock.local/
 
 interface=eth1
+bind-interfaces
 
 ## DNS SERVERS
 server=8.8.8.8
