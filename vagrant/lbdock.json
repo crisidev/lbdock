@@ -10,6 +10,7 @@
   "docker_bridge_ip": "172.17.0.1",
   "owner_group": "users",
   "letsencrypt": false,
+  "letsencrypt_mail_address": "lbdock@lbdock.local",
   "nginx_lua_auth": false,
   "git_allow_registration": true,
   "git_mail_address": "<change me>",

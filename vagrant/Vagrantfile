@@ -15,11 +15,13 @@ Vagrant.configure("2") do |config|
 	config.ssh.username = "lbdock"
   config.vm.box = "lbdock"
   config.vm.hostname = "lbdock"
-  config.vm.network "private_network", type: "dhcp"
+  config.vm.network "private_network", ip: "172.28.128.7"
   config.vm.synced_folder ENV['HOME'] + "/.lbdock/conf", "/etc/lbdock"
   config.vm.synced_folder ENV['HOME'] + "/.lbdock/data", "/var/lib/lbdock"
+
   config.vm.provider "virtualbox" do |v|
-      v.name = "lbdock"
+      v.name = "lbdock-debian-jessie"
+      v.customize ['modifyvm', :id, '--cableconnected1', 'on']
   end
   config.vm.provision "shell", inline: $script
 end

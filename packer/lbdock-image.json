@@ -64,6 +64,8 @@
         "scripts/vbaddguest.sh",
         "scripts/nginx.sh",
         "scripts/docker.sh",
+        "scripts/dnsmasq.sh",
+        "scripts/resolvconf.sh",
         "scripts/cleanup.sh"
       ],
       "only": ["virtualbox-iso"]
