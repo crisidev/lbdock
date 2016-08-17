@@ -10,6 +10,7 @@ sudo systemctl restart nginx
 sudo systemctl restart dnsmasq
 sudo lbdock load dnsdock.service hub.service cadvisor.service git.service drone.service lbdock-proxy.service lbdock-proxy.timer cleanup.service cleanup.timer
 sudo lbdock start dnsdock.service hub.service cadvisor.service git.service drone.service lbdock-proxy.timer cleanup.timer
+sudo systemctl enable dnsdock.service hub.service cadvisor.service git.service drone.service lbdock-proxy.timer cleanup.timer
 sleep 10
 sudo lbdock proxy
 SCRIPT
