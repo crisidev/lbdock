@@ -21,7 +21,7 @@ Type=notify
 # the default is not to use systemd for cgroups because the delegate issues still
 # exists and systemd currently does not support the cgroup feature set required
 # for containers run by docker
-ExecStart=/usr/bin/dockerd -H fd:// --bip=172.17.0.1/16 --dns=172.17.0.1 --dns=8.8.8.8 --insecure-registry=hub.lbdock.local
+ExecStart=/usr/bin/dockerd -H fd:// --storage-driver=overlay2 --bip=172.17.0.1/16 --dns=172.17.0.1 --dns=8.8.8.8 --insecure-registry=hub.lbdock.local
 ExecReload=/bin/kill -s HUP $MAINPID
 # Having non-zero Limit*s causes performance problems due to accounting overhead
 # in the kernel. We recommend using cgroups to do container-local accounting.

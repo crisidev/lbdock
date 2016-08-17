@@ -25,7 +25,7 @@
   "registry_s3_secret_key": "<change me>",
   "registry_s3_region": "<change me>",
   "registry_s3_bucket": "<change me>",
-  "dnsdock_url": "http://dnsdock.lobdock.local/services",
+  "dnsdock_url": "http://dnsdock.lbdock.local/services",
   "drone_url": "http://drone.lbdock.local",
   "drone_user": "drone",
   "drone_token": "<change me>",

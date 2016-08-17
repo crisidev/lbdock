@@ -43,7 +43,7 @@ def cli(remote, debug):
         dest = "{}@{}".format(config.field('ssh_user'), config.field('ssh_host'))
         if bool(set(args) & set(config.field('remote_sudo_cmds'))):
             click.echo("cmd {} requires sudo, forwarding sudo command".format(args[0]))
-            dest = "{}@{}".format('root', config.field('ssh_host'))
+            cmd = 'sudo ' + cmd
 
         ssh_cmd = "ssh -p {} {} -t \"{} {}\"".format(config.field('ssh_port'), dest, cmd, ' '.join(args))
         r, o, e = runcmd(ssh_cmd)

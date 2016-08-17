@@ -8,4 +8,4 @@ echo "deb https://apt.dockerproject.org/repo debian-jessie main" |tee /etc/apt/s
 echo "deb http://ftp.debian.org/debian jessie-backports main" |tee /etc/apt/sources.list.d/backports.list
 
 apt-get update
-apt-get -y install htop iotop bmon dstat sudo bzip2 acpid wget curl dkms build-essential nfs-common python python-pip python-jinja2 avahi-daemon
+apt-get -y install htop iotop bmon dstat sudo bzip2 acpid wget curl dkms build-essential nfs-common python python-pip python-jinja2 vim-nox zsh
