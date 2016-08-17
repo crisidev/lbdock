@@ -1,0 +1,12 @@
+[Unit]
+Description=Cleanup routines
+After=cluster.service docker.service
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/bin/bash -c "docker rm $(docker ps -aq) || exit 0"
+ExecStart=/bin/bash -c "docker rmi $(docker images --quiet --filter dangling=true) || exit 0"
+
+[Install]
+WantedBy=multi-user.target

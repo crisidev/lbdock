@@ -8,9 +8,10 @@ sudo cp -f vagrant/lbdock.json /etc/lbdock/lbdock.json
 sudo ./link_nginx.sh
 sudo systemctl restart nginx
 sudo systemctl restart dnsmasq
-sudo lbdock start dnsdock.service
-sudo lbdock start hub.service
-sudo lbdock start cadvisor.service
+sudo lbdock load dnsdock.service hub.service cadvisor.service git.service drone.service lbdock-proxy.service lbdock-proxy.timer cleanup.service cleanup.timer
+sudo lbdock start dnsdock.service hub.service cadvisor.service git.service drone.service lbdock-proxy.timer cleanup.timer
+sleep 10
+sudo lbdock proxy
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -18,8 +19,8 @@ Vagrant.configure("2") do |config|
   config.ssh.username = "lbdock"
   config.vm.network "private_network", ip: "172.28.128.7"
   config.vm.hostname = "lbdock-debian-jessie"
-  config.vm.synced_folder ENV['HOME'] + "/.lbdock/conf", "/etc/lbdock"
-  config.vm.synced_folder ENV['HOME'] + "/.lbdock/data", "/var/lib/lbdock"
+  config.vm.synced_folder ENV['HOME'] + "/.lbdock/conf", "/etc/lbdock", mount_options: ["dmode=777", "fmode=666"], group: 1000
+  config.vm.synced_folder ENV['HOME'] + "/.lbdock/data", "/var/lib/lbdock", mount_options: ["dmode=777", "fmode=666"], group: 1000
 
   config.vm.provider "virtualbox" do |v|
       v.name = "lbdock-debian-jessie"

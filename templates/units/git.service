@@ -5,7 +5,7 @@ After=docker.service dnsdock.service
 [Service]
 Restart=on-failure
 TimeoutStartSec=0
-Environment="DOCKER_IMAGE=crisidev/gogs:0.9.60"
+Environment="DOCKER_IMAGE=crisidev/gogs:0.9.71"
 Environment="DOCKER_NAME=git"
 Environment="DOCKER_PORT=80"
 Environment="DNSDOCK_ENV=prod"
